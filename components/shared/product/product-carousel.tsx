@@ -13,8 +13,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const ProductCarousel = ({ data }: { data: Product[] }) => {
-  console.log(data);
-  
+  // console.log('Data banner log', data[0].banner);
+
   return (
     <Carousel
       className='w-full mb-12'
@@ -30,32 +30,34 @@ const ProductCarousel = ({ data }: { data: Product[] }) => {
       ]}
     >
       <CarouselContent>
-        {data.map((product: Product) => (
-          <CarouselItem key={product.id}>
-            <Link href={`/product/${product.slug}`}>
-              <div className='relative mx-auto'>
-                <Image
+        {data.map((product: Product) => {
+          console.log('Data banner log', product.banner);
+          return (
+            <CarouselItem key={product.id}>
+              <Link href={`/product/${product.slug}`}>
+                <div className='relative mx-auto'>
+                  <Image
                     src={
-    product.banner
-      ? `/images/sample-products/${product.banner}`
-      : '/images/sample-products/banner-1.jpg' 
-  }
-
-                  alt={product.name}
-                  height='0'
-                  width='0'
-                  sizes='100vw'
-                  className='w-full h-auto'
-                />
-                <div className='absolute inset-0 flex items-end justify-center'>
-                  <h2 className='bg-gray-900 bg-opacity-50 text-2xl font-bold px-2 text-white'>
-                    {product.name}
-                  </h2>
+                      product.banner
+                        ? `/images/sample-products/${product.banner}`
+                        : '/images/banner-1.jpg'
+                    }
+                    alt={product.name}
+                    height='0'
+                    width='0'
+                    sizes='100vw'
+                    className='w-full h-auto'
+                  />
+                  <div className='absolute inset-0 flex items-end justify-center'>
+                    <h2 className='bg-gray-900 bg-opacity-50 text-2xl font-bold px-2 text-white'>
+                      {product.name}
+                    </h2>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          </CarouselItem>
-        ))}
+              </Link>
+            </CarouselItem>
+          );
+        })}
       </CarouselContent>
       <CarouselPrevious />
       <CarouselNext />

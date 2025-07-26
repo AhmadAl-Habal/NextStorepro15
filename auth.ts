@@ -5,7 +5,7 @@ import { prisma } from '@/db/prisma';
 import { cookies } from 'next/headers';
 import { compare } from './lib/encrypt';
 import CredentialsProvider from 'next-auth/providers/credentials';
-console.log('NEXTAUTH_SECRET:', process.env.NEXTAUTH_SECRET);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: '/sign-in',
@@ -23,34 +23,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !(credentials.password as string)?.length)
-          return null;
+        if (credentials == null) return null;
 
+        // Find user in database
         const user = await prisma.user.findFirst({
           where: {
-            email: credentials.email,
+            email: credentials.email as string,
           },
         });
 
-        if (!user?.password || user.password.length < 6) {
-          // Prevent bcrypt errors on empty/invalid hash
-          console.warn('User has no valid password hash');
-          return null;
+        // Check if user exists and if the password matches
+        if (user && user.password) {
+          const isMatch = await compare(
+            credentials.password as string,
+            user.password
+          );
+
+          // If password is correct, return user
+          if (isMatch) {
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            };
+          }
         }
-
-        const isMatch = await compare(
-          credentials.password as string,
-          user.password
-        );
-
-        if (!isMatch) return null;
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
+        // If user does not exist or password does not match return null
+        return null;
       },
     }),
   ],
